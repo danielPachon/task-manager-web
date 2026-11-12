@@ -16,7 +16,10 @@
   --medium-soft: #fbf1d9;
   --low-soft: #e2f3eb;
   --focus: #2f5bea;
-  --shadow-lift: 0 12px 28px rgba(30, 42, 58, 0.18);
+  --shadow-lift: 0 0 0 1px rgba(30, 42, 58, 0.06), 0 12px 28px -8px rgba(30, 42, 58, 0.22);
+  --shadow-card: 0 0 0 1px rgba(30, 42, 58, 0.07), 0 1px 2px rgba(30, 42, 58, 0.06);
+  --shadow-card-hover: 0 0 0 1px rgba(30, 42, 58, 0.09), 0 6px 16px -6px rgba(30, 42, 58, 0.18);
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
 
   --font-display: 'Bricolage Grotesque Variable', 'Segoe UI', sans-serif;
   --font-body: 'Atkinson Hyperlegible', 'Segoe UI', system-ui, sans-serif;
@@ -46,7 +49,9 @@
   --medium-soft: #382f1b;
   --low-soft: #1b3329;
   --focus: #93abfa;
-  --shadow-lift: 0 14px 32px rgba(0, 0, 0, 0.45);
+  --shadow-lift: 0 0 0 1px rgba(255, 255, 255, 0.07), 0 14px 32px -8px rgba(0, 0, 0, 0.6);
+  --shadow-card: 0 0 0 1px rgba(255, 255, 255, 0.06), 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-card-hover: 0 0 0 1px rgba(255, 255, 255, 0.1), 0 6px 16px -6px rgba(0, 0, 0, 0.6);
   color-scheme: dark;
 }
 
@@ -117,6 +122,13 @@ textarea {
   font-weight: 700;
   cursor: pointer;
   background: none;
+  transition-property: background-color, color, scale;
+  transition-duration: 150ms;
+  transition-timing-function: ease;
+}
+
+.button:active:not(:disabled) {
+  scale: 0.97;
 }
 
 .button:disabled {
@@ -129,17 +141,34 @@ textarea {
   color: var(--accent-ink);
 }
 
-.button--primary:hover:not(:disabled) {
-  background: var(--accent-hover);
+@media (hover: hover) and (pointer: fine) {
+  .button--primary:hover:not(:disabled) {
+    background: var(--accent-hover);
+  }
+
+  .button--ghost:hover,
+  .icon-button:hover {
+    background: var(--surface-2);
+  }
+
+  .icon-button--small:hover {
+    color: var(--ink);
+    background: var(--surface-2);
+  }
+
+  .card:hover {
+    box-shadow: var(--shadow-card-hover);
+  }
+
+  .card__open:hover .card__title {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
 }
 
 .button--ghost {
   border-color: var(--line);
   background: var(--surface);
-}
-
-.button--ghost:hover {
-  background: var(--surface-2);
 }
 
 .button--danger {
@@ -164,13 +193,17 @@ textarea {
   border-radius: 8px;
   background: var(--surface);
   cursor: pointer;
+  transition-property: background-color, color, scale;
+  transition-duration: 150ms;
+  transition-timing-function: ease;
 }
 
-.icon-button:hover {
-  background: var(--surface-2);
+.icon-button:active {
+  scale: 0.94;
 }
 
 .icon-button--small {
+  position: relative;
   width: 1.75rem;
   height: 1.75rem;
   border-color: transparent;
@@ -178,8 +211,11 @@ textarea {
   color: var(--ink-2);
 }
 
-.icon-button--small:hover {
-  color: var(--ink);
+/* Visually small, but a 40px tap target */
+.icon-button--small::after {
+  content: '';
+  position: absolute;
+  inset: -6px;
 }
 
 input:not([type='radio']),
@@ -323,6 +359,13 @@ input[aria-invalid='true'] {
   font-weight: 700;
   font-size: 0.85rem;
   cursor: pointer;
+  transition-property: background-color, color, scale;
+  transition-duration: 150ms;
+  transition-timing-function: ease;
+}
+
+.switch__option:active {
+  scale: 0.95;
 }
 
 .switch__option:hover {
@@ -551,10 +594,11 @@ input[aria-invalid='true'] {
   color: var(--ink);
   font-family: var(--font-display);
   font-size: 1.25rem;
+  font-variant-numeric: tabular-nums;
 }
 
 .progress__bar {
-  display: flex;
+  position: relative;
   height: 0.5rem;
   border-radius: var(--r-chip);
   background: var(--line);
@@ -562,7 +606,10 @@ input[aria-invalid='true'] {
 }
 
 .progress__seg {
-  transition: width 400ms ease;
+  position: absolute;
+  inset: 0;
+  transform-origin: left;
+  transition: transform 400ms var(--ease-out);
 }
 
 .progress__seg--done {
@@ -615,6 +662,13 @@ input[aria-invalid='true'] {
   font-weight: 700;
   font-size: 0.9rem;
   cursor: pointer;
+  transition-property: background-color, color, border-color, scale;
+  transition-duration: 150ms;
+  transition-timing-function: ease;
+}
+
+.chip:active {
+  scale: 0.96;
 }
 
 .chip::before {
@@ -669,11 +723,12 @@ input[aria-invalid='true'] {
   flex-direction: column;
   gap: 0.85rem;
   min-height: 14rem;
-  padding: 1rem;
-  border-radius: var(--r-column);
+  padding: 0.75rem;
+  /* Concentric: card radius (10px) + column padding (12px) */
+  border-radius: 22px;
   background: var(--surface-2);
-  border: 2px solid transparent;
-  transition: border-color 150ms ease, background-color 150ms ease;
+  box-shadow: inset 0 0 0 2px transparent;
+  transition: box-shadow 150ms ease, background-color 150ms ease;
 }
 
 :root[data-theme='dark'] .column {
@@ -681,11 +736,12 @@ input[aria-invalid='true'] {
 }
 
 .column--over {
-  border-color: var(--accent);
-  border-style: dashed;
+  background: color-mix(in srgb, var(--accent) 8%, var(--surface-2));
+  box-shadow: inset 0 0 0 2px var(--accent);
 }
 
 .column__head {
+  padding: 0.35rem 0.4rem 0.1rem;
   display: flex;
   align-items: center;
   gap: 0.55rem;
@@ -718,6 +774,7 @@ input[aria-invalid='true'] {
   color: var(--ink-2);
   font-family: var(--font-body);
   font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
   text-align: center;
   line-height: 1.6;
 }
@@ -739,29 +796,41 @@ input[aria-invalid='true'] {
 
 /* ---------- Task card ---------- */
 .card {
+  position: relative;
   display: grid;
   gap: 0.5rem;
-  padding: 0.85rem 0.9rem 0.6rem 1rem;
-  border: 1px solid var(--line);
-  border-left: 4px solid var(--ink-2);
+  padding: 0.85rem 0.9rem 0.6rem 1.15rem;
   border-radius: var(--r-card);
   background: var(--surface);
+  box-shadow: var(--shadow-card);
   cursor: grab;
+  transition: box-shadow 200ms ease, opacity 150ms ease;
 }
 
-.card--high {
-  border-left-color: var(--high);
+/* Priority edge drawn inside the card so the radius stays clean */
+.card::before {
+  content: '';
+  position: absolute;
+  left: 6px;
+  top: 10px;
+  bottom: 10px;
+  width: 3px;
+  border-radius: 3px;
+  background: var(--ink-2);
 }
-.card--medium {
-  border-left-color: var(--medium);
+
+.card--high::before {
+  background: var(--high);
 }
-.card--low {
-  border-left-color: var(--low);
+.card--medium::before {
+  background: var(--medium);
+}
+.card--low::before {
+  background: var(--low);
 }
 
 .card--dragging {
-  opacity: 0.5;
-  box-shadow: var(--shadow-lift);
+  opacity: 0.45;
 }
 
 .card__open {
@@ -775,12 +844,8 @@ input[aria-invalid='true'] {
 .card__title {
   font-weight: 700;
   line-height: 1.35;
+  text-wrap: pretty;
   overflow-wrap: anywhere;
-}
-
-.card__open:hover .card__title {
-  text-decoration: underline;
-  text-underline-offset: 3px;
 }
 
 .card--done .card__title {
@@ -873,18 +938,42 @@ input[aria-invalid='true'] {
   box-shadow: var(--shadow-lift);
 }
 
-.dialog::backdrop {
-  background: rgba(16, 22, 31, 0.55);
+.dialog {
+  opacity: 0;
+  scale: 0.96;
+  transition-property: opacity, scale, overlay, display;
+  transition-duration: 200ms;
+  transition-timing-function: var(--ease-out);
+  transition-behavior: allow-discrete;
 }
 
 .dialog[open] {
-  animation: rise 180ms ease-out;
+  opacity: 1;
+  scale: 1;
 }
 
-@keyframes rise {
-  from {
+@starting-style {
+  .dialog[open] {
     opacity: 0;
-    translate: 0 0.75rem;
+    scale: 0.96;
+  }
+}
+
+.dialog::backdrop {
+  background: rgba(16, 22, 31, 0);
+  transition-property: background-color, overlay, display;
+  transition-duration: 200ms;
+  transition-timing-function: var(--ease-out);
+  transition-behavior: allow-discrete;
+}
+
+.dialog[open]::backdrop {
+  background: rgba(16, 22, 31, 0.55);
+}
+
+@starting-style {
+  .dialog[open]::backdrop {
+    background: rgba(16, 22, 31, 0);
   }
 }
 
@@ -988,12 +1077,21 @@ input[aria-invalid='true'] {
 }
 
 .toast {
+  animation: toast-in 220ms var(--ease-out);
   padding: 0.65rem 1rem;
   border-radius: 10px;
   background: var(--ink);
   color: var(--surface);
   font-weight: 700;
   box-shadow: var(--shadow-lift);
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    translate: 0 8px;
+    scale: 0.98;
+  }
 }
 
 .toast--error {
@@ -1132,11 +1230,28 @@ input[aria-invalid='true'] {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
+  .button,
+  .icon-button,
+  .card,
+  .column,
+  .chip,
+  .switch__option,
+  .progress__seg,
+  .dialog,
+  .dialog::backdrop {
+    transition: none;
+  }
+
+  .button:active:not(:disabled),
+  .icon-button:active,
+  .chip:active,
+  .switch__option:active {
+    scale: none;
+  }
+
+  .toast,
+  .preview-card,
+  .skeleton {
+    animation: none;
   }
 }

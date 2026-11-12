@@ -7,7 +7,7 @@ export function Progress({ tasks }: { tasks: Task[] }) {
   const total = tasks.length
   const done = tasks.filter((task) => task.status === 'done').length
   const inProgress = tasks.filter((task) => task.status === 'in_progress').length
-  const pct = (n: number) => (total ? (n / total) * 100 : 0)
+  const ratio = (n: number) => (total ? n / total : 0)
 
   return (
     <div className="progress">
@@ -21,8 +21,12 @@ export function Progress({ tasks }: { tasks: Task[] }) {
         role="img"
         aria-label={t('board.progressLabel', { done, inProgress, todo: total - done - inProgress })}
       >
-        <span className="progress__seg progress__seg--done" style={{ width: `${pct(done)}%` }} />
-        <span className="progress__seg progress__seg--progress" style={{ width: `${pct(inProgress)}%` }} />
+        {/* Animated with transform, not width, so updates never trigger layout */}
+        <span className="progress__seg progress__seg--done" style={{ transform: `scaleX(${ratio(done)})` }} />
+        <span
+          className="progress__seg progress__seg--progress"
+          style={{ transform: `translateX(${ratio(done) * 100}%) scaleX(${ratio(inProgress)})` }}
+        />
       </div>
     </div>
   )

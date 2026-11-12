@@ -18,6 +18,8 @@ A Kanban-style task manager built with **React, TypeScript and TanStack Query**.
 
 - **Kanban board** with three columns (To do, In progress, Done). Move tasks with **drag and drop** or with the arrow buttons, which also work on touch screens and with the keyboard.
 - **Optimistic updates**: moving a card is instant, and the change is rolled back if the server rejects it.
+- **Purposeful motion with GSAP**: a moved card travels to its new column (GSAP Flip) so the change is easy to follow, and cards fade in once per session. Everything else stays instant, as product UI should, and all motion is off with `prefers-reduced-motion`.
+- **Interface polish**: layered shadows instead of borders, concentric radii, press feedback on buttons, hover effects only on mouse devices, 40px tap targets on small controls and tabular numbers for counts.
 - **Search, priority filters and sorting** by creation date, due date or priority, all handled by the API.
 - **Due dates that stand out**: "Due tomorrow", "Due in 3 days" or a dashed "2 days overdue" stamp.
 - **Create, edit and delete** tasks in an accessible modal dialog, with a two-step delete confirmation.
@@ -38,6 +40,7 @@ A Kanban-style task manager built with **React, TypeScript and TanStack Query**.
 |---|---|
 | UI | React 19, TypeScript (strict), plain CSS with design tokens |
 | Data | TanStack Query (caching, optimistic updates), Fetch API |
+| Motion | GSAP with Flip and `@gsap/react`, CSS transitions with `@starting-style` |
 | i18n | Lightweight typed dictionaries (English and Spanish), `Intl` date formatting |
 | Routing | React Router |
 | Testing | Vitest, Testing Library |

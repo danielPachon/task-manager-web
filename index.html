@@ -11,6 +11,9 @@
         var t = localStorage.getItem('tm.theme')
         if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
         document.documentElement.dataset.theme = t
+        var l = localStorage.getItem('tm.lang')
+        if (!l) l = (navigator.language || '').toLowerCase().indexOf('es') === 0 ? 'es' : 'en'
+        document.documentElement.lang = l
       } catch (e) {}
     </script>
   </head>

@@ -1,7 +1,8 @@
 import { Trash2, X } from 'lucide-react'
 import { useEffect, useRef, useState, type FormEvent } from 'react'
-import { ApiError } from '../api/client'
 import type { Task, TaskInput, TaskPriority, TaskStatus } from '../api/types'
+import { errorMessage } from '../i18n/translate'
+import { usePreferences } from '../preferences/PreferencesContext'
 import { PRIORITIES, STATUSES } from '../utils/constants'
 
 interface Props {
@@ -14,6 +15,7 @@ interface Props {
 }
 
 export function TaskDialog({ task, open, onClose, onSave, onDelete }: Props) {
+  const { t } = usePreferences()
   const dialogRef = useRef<HTMLDialogElement>(null)
   // The parent remounts this component (via `key`) each time it opens, so state starts from the task
   const [title, setTitle] = useState(task?.title ?? '')
@@ -35,7 +37,7 @@ export function TaskDialog({ task, open, onClose, onSave, onDelete }: Props) {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
     if (!title.trim()) {
-      setError('Give the task a title.')
+      setError(t('dialog.titleRequired'))
       return
     }
     setSaving(true)
@@ -49,7 +51,8 @@ export function TaskDialog({ task, open, onClose, onSave, onDelete }: Props) {
         dueDate: dueDate || (task ? null : undefined),
       })
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'The task could not be saved. Try again.')
+      const message = errorMessage(err, t)
+      setError(message === t('errors.generic') ? t('dialog.saveError') : message)
     } finally {
       setSaving(false)
     }
@@ -61,7 +64,7 @@ export function TaskDialog({ task, open, onClose, onSave, onDelete }: Props) {
     try {
       await onDelete(task)
     } catch {
-      setError('The task could not be deleted. Try again.')
+      setError(t('dialog.deleteError'))
     } finally {
       setSaving(false)
     }
@@ -79,48 +82,48 @@ export function TaskDialog({ task, open, onClose, onSave, onDelete }: Props) {
     >
       <form className="dialog__body" onSubmit={handleSubmit} noValidate>
         <div className="dialog__head">
-          <h2 id="task-dialog-title">{task ? 'Edit task' : 'New task'}</h2>
-          <button type="button" className="icon-button" onClick={onClose} aria-label="Close">
+          <h2 id="task-dialog-title">{task ? t('dialog.editTitle') : t('dialog.newTitle')}</h2>
+          <button type="button" className="icon-button" onClick={onClose} aria-label={t('dialog.close')}>
             <X size={18} />
           </button>
         </div>
 
         <label className="field">
-          <span className="field__label">Title</span>
+          <span className="field__label">{t('dialog.title')}</span>
           <input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             maxLength={200}
             autoFocus
-            placeholder="What needs to get done?"
+            placeholder={t('dialog.titlePlaceholder')}
             aria-invalid={!!error && !title.trim()}
           />
         </label>
 
         <label className="field">
-          <span className="field__label">Notes</span>
+          <span className="field__label">{t('dialog.notes')}</span>
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             rows={3}
             maxLength={2000}
-            placeholder="Optional details, links or next steps"
+            placeholder={t('dialog.notesPlaceholder')}
           />
         </label>
 
         <fieldset className="field">
-          <legend className="field__label">Priority</legend>
+          <legend className="field__label">{t('dialog.priority')}</legend>
           <div className="segmented">
             {PRIORITIES.map((p) => (
-              <label key={p.id} className={`segmented__option segmented__option--${p.id}`}>
+              <label key={p} className={`segmented__option segmented__option--${p}`}>
                 <input
                   type="radio"
                   name="priority"
-                  value={p.id}
-                  checked={priority === p.id}
-                  onChange={() => setPriority(p.id)}
+                  value={p}
+                  checked={priority === p}
+                  onChange={() => setPriority(p)}
                 />
-                <span>{p.label}</span>
+                <span>{t(`priority.${p}`)}</span>
               </label>
             ))}
           </div>
@@ -128,17 +131,17 @@ export function TaskDialog({ task, open, onClose, onSave, onDelete }: Props) {
 
         <div className="field-row">
           <label className="field">
-            <span className="field__label">Column</span>
+            <span className="field__label">{t('dialog.column')}</span>
             <select value={status} onChange={(e) => setStatus(e.target.value as TaskStatus)}>
               {STATUSES.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.label}
+                <option key={s} value={s}>
+                  {t(`status.${s}`)}
                 </option>
               ))}
             </select>
           </label>
           <label className="field">
-            <span className="field__label">Due date</span>
+            <span className="field__label">{t('dialog.dueDate')}</span>
             <input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
           </label>
         </div>
@@ -153,22 +156,22 @@ export function TaskDialog({ task, open, onClose, onSave, onDelete }: Props) {
           {task &&
             (confirmingDelete ? (
               <span className="confirm-delete">
-                Delete this task?
+                {t('dialog.confirmDelete')}
                 <button type="button" className="button button--danger" onClick={handleDelete} disabled={saving}>
-                  Delete
+                  {t('dialog.delete')}
                 </button>
                 <button type="button" className="button button--ghost" onClick={() => setConfirmingDelete(false)}>
-                  Keep
+                  {t('dialog.keep')}
                 </button>
               </span>
             ) : (
               <button type="button" className="button button--ghost button--danger-text" onClick={() => setConfirmingDelete(true)}>
                 <Trash2 size={16} aria-hidden="true" />
-                Delete
+                {t('dialog.delete')}
               </button>
             ))}
           <button type="submit" className="button button--primary dialog__save" disabled={saving}>
-            {saving ? 'Saving…' : task ? 'Save changes' : 'Add task'}
+            {saving ? t('dialog.saving') : task ? t('dialog.save') : t('dialog.add')}
           </button>
         </div>
       </form>

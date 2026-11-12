@@ -1,5 +1,4 @@
 import { useMemo, useState } from 'react'
-import { ApiError } from '../api/client'
 import type { Task, TaskFilters, TaskInput, TaskStatus } from '../api/types'
 import { Header } from '../components/Header'
 import { Progress } from '../components/Progress'
@@ -9,10 +8,13 @@ import { useToast } from '../components/Toast'
 import { Toolbar } from '../components/Toolbar'
 import { useDebounced } from '../hooks/useDebounced'
 import { useTaskMutations, useTasks } from '../hooks/useTasks'
-import { STATUSES, STATUS_LABEL } from '../utils/constants'
+import { errorMessage } from '../i18n/translate'
+import { usePreferences } from '../preferences/PreferencesContext'
+import { STATUSES } from '../utils/constants'
 
 export function BoardPage() {
   const toast = useToast()
+  const { t } = usePreferences()
   const [search, setSearch] = useState('')
   const [filters, setFilters] = useState<TaskFilters>({ sortBy: 'createdAt', order: 'desc' })
   const debouncedSearch = useDebounced(search.trim())
@@ -47,8 +49,8 @@ export function BoardPage() {
     update.mutate(
       { id: task.id, input: { status } },
       {
-        onSuccess: () => toast(`Moved to ${STATUS_LABEL[status]}`),
-        onError: () => toast('The task could not be moved. Try again.', 'error'),
+        onSuccess: () => toast(t('toast.moved', { column: t(`status.${status}`) })),
+        onError: () => toast(t('toast.moveError'), 'error'),
       },
     )
   }
@@ -61,10 +63,10 @@ export function BoardPage() {
   const handleSave = async (input: TaskInput) => {
     if (editing) {
       await update.mutateAsync({ id: editing.id, input })
-      toast('Changes saved')
+      toast(t('toast.saved'))
     } else {
       await create.mutateAsync(input)
-      toast('Task added')
+      toast(t('toast.added'))
     }
     setDialogOpen(false)
   }
@@ -72,7 +74,7 @@ export function BoardPage() {
   const handleDelete = async (task: Task) => {
     await remove.mutateAsync(task.id)
     setDialogOpen(false)
-    toast('Task deleted')
+    toast(t('toast.deleted'))
   }
 
   const filtering = Boolean(debouncedSearch || filters.priority)
@@ -82,7 +84,7 @@ export function BoardPage() {
       <Header />
       <main className="board-main">
         <div className="board-intro">
-          <h1>Board</h1>
+          <h1>{t('board.title')}</h1>
           <Progress tasks={tasks} />
         </div>
 
@@ -97,16 +99,18 @@ export function BoardPage() {
         {query.isError ? (
           <div className="board-message" role="alert">
             <p>
-              {query.error instanceof ApiError ? query.error.message : 'Tasks could not be loaded.'}
+              {query.error && errorMessage(query.error, t) !== t('errors.generic')
+                ? errorMessage(query.error, t)
+                : t('board.loadError')}
             </p>
             <button type="button" className="button button--primary" onClick={() => query.refetch()}>
-              Try again
+              {t('board.retry')}
             </button>
           </div>
         ) : query.isPending ? (
-          <div className="board board--loading" aria-busy="true" aria-label="Loading tasks">
+          <div className="board board--loading" aria-busy="true" aria-label={t('board.loading')}>
             {STATUSES.map((s) => (
-              <div key={s.id} className="column column--skeleton">
+              <div key={s} className="column column--skeleton">
                 <span className="skeleton skeleton--head" />
                 <span className="skeleton" />
                 <span className="skeleton" />
@@ -116,16 +120,16 @@ export function BoardPage() {
         ) : (
           <>
             {filtering && tasks.length === 0 && (
-              <p className="board-filter-note">No tasks match these filters.</p>
+              <p className="board-filter-note">{t('board.noMatch')}</p>
             )}
             <div className="board">
               {STATUSES.map((s) => (
                 <TaskColumn
-                  key={s.id}
-                  status={s.id}
-                  label={s.label}
-                  empty={filtering ? 'No matching tasks.' : s.empty}
-                  tasks={byStatus[s.id]}
+                  key={s}
+                  status={s}
+                  label={t(`status.${s}`)}
+                  empty={filtering ? t('board.noMatchColumn') : t(`empty.${s}`)}
+                  tasks={byStatus[s]}
                   onOpen={openEdit}
                   onMove={moveTask}
                   onDropTask={handleDrop}

@@ -8,6 +8,7 @@ import App from './App'
 import { ApiError } from './api/client'
 import { AuthProvider } from './auth/AuthContext'
 import { ToastProvider } from './components/Toast'
+import { PreferencesProvider } from './preferences/PreferencesContext'
 import './index.css'
 
 const queryClient = new QueryClient({
@@ -23,12 +24,14 @@ const queryClient = new QueryClient({
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <ToastProvider>
-          <App />
-        </ToastProvider>
-      </AuthProvider>
-    </QueryClientProvider>
+    <PreferencesProvider>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <ToastProvider>
+            <App />
+          </ToastProvider>
+        </AuthProvider>
+      </QueryClientProvider>
+    </PreferencesProvider>
   </StrictMode>,
 )

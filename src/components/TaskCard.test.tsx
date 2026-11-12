@@ -1,6 +1,7 @@
-import { render, screen } from '@testing-library/react'
+import { screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import type { Task } from '../api/types'
+import { renderWithPrefs as render } from '../test/render'
 import { TaskCard } from './TaskCard'
 
 const baseTask: Task = {
@@ -51,5 +52,14 @@ describe('TaskCard', () => {
       <TaskCard task={{ ...baseTask, status: 'done', dueDate: '2020-01-01' }} onOpen={vi.fn()} onMove={vi.fn()} />,
     )
     expect(screen.queryByText(/overdue/i)).not.toBeInTheDocument()
+  })
+})
+
+describe('TaskCard in Spanish', () => {
+  it('translates priority and move actions', () => {
+    localStorage.setItem('tm.lang', 'es')
+    render(<TaskCard task={baseTask} onOpen={vi.fn()} onMove={vi.fn()} />)
+    expect(screen.getByText('Prioridad alta')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Mover "Prepare sprint demo" a Hecho' })).toBeInTheDocument()
   })
 })

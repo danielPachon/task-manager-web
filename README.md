@@ -6,7 +6,7 @@
 ![Vite](https://img.shields.io/badge/Vite-646CFF?logo=vite&logoColor=white)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 
-**🚀 Live demo:** [task-manager-web.onrender.com](https://task-manager-web.onrender.com)
+**🚀 Live demo:** [task-manager-web-cn5q.onrender.com](https://task-manager-web-cn5q.onrender.com)
 
 A Kanban-style task manager built with **React, TypeScript and TanStack Query**. It is the frontend for my [Task Manager API](https://github.com/danielPachon/task-manager-api) (Node.js, Express, PostgreSQL).
 

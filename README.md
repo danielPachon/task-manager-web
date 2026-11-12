@@ -23,13 +23,14 @@ A Kanban-style task manager built with **React, TypeScript and TanStack Query**.
 - **Create, edit and delete** tasks in an accessible modal dialog, with a two-step delete confirmation.
 - **Authentication** with JWT: register, log in, session kept across reloads and automatic logout when the token expires.
 - **Server validation errors** shown next to the field they belong to.
-- **Light and dark themes**, following the system setting by default.
+- **English and Spanish**: every label, message, date and API error is translated. The first visit follows the browser language, and the choice is remembered.
+- **Light and dark themes** with a visible switch on every screen, following the system setting by default.
 - **Responsive** from 375 px phones to wide screens.
 - **Cold-start notice** when a request takes longer than three seconds.
 
-| Login | Dark theme |
+| Login | Spanish, dark theme |
 |---|---|
-| ![Login page](docs/login.png) | ![Dark theme](docs/board-dark.png) |
+| ![Login page](docs/login.png) | ![Spanish interface in dark theme](docs/board-dark.png) |
 
 ## Tech stack
 
@@ -37,6 +38,7 @@ A Kanban-style task manager built with **React, TypeScript and TanStack Query**.
 |---|---|
 | UI | React 19, TypeScript (strict), plain CSS with design tokens |
 | Data | TanStack Query (caching, optimistic updates), Fetch API |
+| i18n | Lightweight typed dictionaries (English and Spanish), `Intl` date formatting |
 | Routing | React Router |
 | Testing | Vitest, Testing Library |
 | Tooling | Vite, Oxlint, GitHub Actions |
@@ -48,7 +50,9 @@ A Kanban-style task manager built with **React, TypeScript and TanStack Query**.
 src/
 ├── api/          # Typed fetch client, endpoints and API types
 ├── auth/         # Auth context: session storage, login, register, logout
-├── hooks/        # Task queries and mutations, theme, debounce, slow-request detection
+├── hooks/        # Task queries and mutations, debounce, slow-request detection
+├── i18n/         # English and Spanish messages, translator, localized dates and error mapping
+├── preferences/  # Language and theme context, persisted per browser
 ├── components/   # Board columns, task card, dialog, toolbar, header, toasts
 ├── pages/        # Auth page and board page
 └── utils/        # Date formatting, constants and safe localStorage access
@@ -59,6 +63,7 @@ src/
 - **Server state lives in TanStack Query**, not in component state. Filters are part of the query key, so each combination is cached and the board updates without manual refetching.
 - **One small fetch wrapper** adds the token, turns error responses into a typed `ApiError` with field details, and logs the user out on a `401`.
 - **Accessibility first**: semantic landmarks, native `<dialog>`, labelled controls, visible focus, keyboard-friendly alternatives to drag and drop, and reduced motion support.
+- **Typed translations without a library**: the Spanish dictionary must define every English key, so a missing translation fails the build. The API answers in English, so error codes are mapped to messages in the user's language.
 - **No UI framework**: the visual system is a small set of CSS custom properties, which keeps the bundle light and the design consistent across both themes.
 
 ## Getting started
@@ -82,7 +87,7 @@ Without a `.env` file, the app uses the deployed API.
 
 ## Testing
 
-Tests cover the date logic, the task card interactions and the login and registration flows, including how API validation errors are displayed.
+Tests cover translations and date formatting in both languages, the task card interactions, the language and theme switches, and the login and registration flows, including how API validation errors are displayed.
 
 ```bash
 npm test

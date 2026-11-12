@@ -22,6 +22,7 @@ export function TaskCard({ task, onOpen, onMove }: Props) {
   return (
     <article
       className={`card card--${task.priority}${task.status === 'done' ? ' card--done' : ''}`}
+      data-flip-id={task.id}
       draggable
       onDragStart={(e) => {
         e.dataTransfer.setData('text/task-id', task.id)

@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import type { Task, TaskFilters, TaskInput, TaskStatus } from '../api/types'
 import { Header } from '../components/Header'
 import { Progress } from '../components/Progress'
@@ -7,6 +7,7 @@ import { TaskDialog } from '../components/TaskDialog'
 import { useToast } from '../components/Toast'
 import { Toolbar } from '../components/Toolbar'
 import { useDebounced } from '../hooks/useDebounced'
+import { useBoardMotion } from '../motion/useBoardMotion'
 import { useTaskMutations, useTasks } from '../hooks/useTasks'
 import { errorMessage } from '../i18n/translate'
 import { usePreferences } from '../preferences/PreferencesContext'
@@ -26,6 +27,8 @@ export function BoardPage() {
   const [dialogKey, setDialogKey] = useState(0)
 
   const tasks = useMemo(() => query.data?.data ?? [], [query.data])
+  const boardRef = useRef<HTMLDivElement>(null)
+  const captureLayout = useBoardMotion(boardRef, query.isSuccess, tasks)
   const byStatus = useMemo(() => {
     const groups: Record<TaskStatus, Task[]> = { todo: [], in_progress: [], done: [] }
     tasks.forEach((t) => groups[t.status].push(t))
@@ -46,6 +49,7 @@ export function BoardPage() {
 
   const moveTask = (task: Task, status: TaskStatus) => {
     if (task.status === status) return
+    captureLayout()
     update.mutate(
       { id: task.id, input: { status } },
       {
@@ -73,6 +77,7 @@ export function BoardPage() {
 
   const handleDelete = async (task: Task) => {
     await remove.mutateAsync(task.id)
+    captureLayout()
     setDialogOpen(false)
     toast(t('toast.deleted'))
   }
@@ -122,7 +127,7 @@ export function BoardPage() {
             {filtering && tasks.length === 0 && (
               <p className="board-filter-note">{t('board.noMatch')}</p>
             )}
-            <div className="board">
+            <div className="board" ref={boardRef}>
               {STATUSES.map((s) => (
                 <TaskColumn
                   key={s}
